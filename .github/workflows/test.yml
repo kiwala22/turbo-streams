@@ -1,0 +1,39 @@
+name: Testing Workflow
+on: 
+  push:
+    branches: [ main ]
+jobs:
+  test:
+    name: Rails Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Download code
+        uses: actions/checkout@v3
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.2
+          bundler-cache: true
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get -yqq install libpq-dev
+          bundle install
+      - name: Run tests
+        env:
+          RAILS_ENV: "test"
+          DATABASE_URL: "postgres://postgres@localhost:5432/quote_editor_test"
+          RUBYOPT: "-W:no-deprecated -W:no-experimental"
+        run: |
+          bin/rails db:setup
+          bin/rails test:system
