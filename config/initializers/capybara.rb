@@ -1,13 +1,22 @@
 require 'selenium-webdriver'
 
-Capybara.register_driver :custom_chrome do |app|
-  options = Selenium::WebDriver::Chrome::Options.new
-  options.add_argument('--headless') # Run Chrome in headless mode
-  options.add_argument('--disable-gpu') # Disable GPU usage for headless mode
-  options.binary = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' # Replace with the actual path to Chrome binary
+def setup_driver(driver_name, binary_path = nil)
+  Capybara.register_driver driver_name do |app|
+    options = Selenium::WebDriver::Chrome::Options.new
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
 
-  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+    options.binary = binary_path if binary_path
+
+    Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+  end
+
+  Capybara.javascript_driver = driver_name
+  Capybara.default_driver = driver_name
 end
 
-Capybara.javascript_driver = :custom_chrome
-Capybara.default_driver = :custom_chrome
+if RUBY_PLATFORM =~ /darwin/ # Checks if the OS is MacOS
+  setup_driver(:custom_chrome, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
+else
+  setup_driver(:other_platform)
+end

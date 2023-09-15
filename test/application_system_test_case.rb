@@ -20,6 +20,12 @@ require 'selenium-webdriver'
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   include Warden::Test::Helpers
   
-  driven_by :custom_chrome
+  if RUBY_PLATFORM =~ /darwin/ # Check if the OS is MacOS
+    driven_by :custom_chrome
+  else
+    # For Linux (and other OSes), use the default Selenium driver
+    driven_by :other_platform
+  end
 end
+
 

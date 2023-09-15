@@ -5,7 +5,7 @@ on:
 jobs:
   test:
     name: Rails Tests
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     services:
       postgres:
@@ -27,8 +27,7 @@ jobs:
           bundler-cache: true
       - name: Install dependencies
         run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          brew install libpq-dev
+          sudo apt-get update && sudo apt-get -yqq install libpq-dev
           bundle install
       - name: Run tests
         env:
